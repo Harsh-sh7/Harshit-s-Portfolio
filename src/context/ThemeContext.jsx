@@ -15,24 +15,18 @@ export const ThemeProvider = ({ children }) => {
 
     useEffect(() => {
         const storedTheme = localStorage.getItem("theme");
-
         let isDark;
-
         if (storedTheme) {
             isDark = storedTheme === "dark";
         } else {
-            isDark =
-                window.matchMedia?.("(prefers-color-scheme: dark)").matches ??
-                true;
+            isDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true;
         }
-
         setIsDarkMode(isDark);
         setMounted(true);
     }, []);
 
     useEffect(() => {
         if (!mounted) return;
-
         if (isDarkMode) {
             document.documentElement.classList.add("dark");
             localStorage.setItem("theme", "dark");
@@ -43,7 +37,14 @@ export const ThemeProvider = ({ children }) => {
     }, [isDarkMode, mounted]);
 
     const toggleTheme = () => {
-        setIsDarkMode(prev => !prev);
+        if (!document.startViewTransition) {
+            setIsDarkMode(prev => !prev);
+            return;
+        }
+
+        document.startViewTransition(() => {
+            setIsDarkMode(prev => !prev);
+        });
     };
 
     if (!mounted) return null;
