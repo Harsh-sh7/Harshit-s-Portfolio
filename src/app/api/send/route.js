@@ -41,7 +41,7 @@ export async function POST(request) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'Portfolio Contact Form <contact@contact.adotion.pro>',
+      from: 'Portfolio Contact Form <contact@adotion.pro>',
       to: ['malay88patra@gmail.com'],
       subject: `New message from ${name}`,
       reply_to: email,
@@ -63,4 +63,4 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
+
