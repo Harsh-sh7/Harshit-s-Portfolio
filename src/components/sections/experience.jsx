@@ -1,23 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from 'react'
+import { getPortfolioData } from '@/lib/dataCache';
 
 export default function Experience() {
     const [experiences, setExperiences] = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetch(`/api/admin/experiences?t=${Date.now()}`)
-            .then(res => {
-                if (!res.ok) throw new Error("Server error " + res.status);
-                return res.json();
-            })
+        getPortfolioData()
             .then(data => {
-                if (data.success) {
-                    const visibleExperiences = data.data.filter(exp => exp.isVisible !== false);
-                    setExperiences(visibleExperiences);
+                if (data?.experiences) {
+                    const visible = data.experiences.filter(exp => exp.isVisible !== false);
+                    setExperiences(visible);
                 }
-                setLoading(false)
+                setLoading(false);
             })
             .catch((err) => {
                 console.error("Failed to load experiences:", err);

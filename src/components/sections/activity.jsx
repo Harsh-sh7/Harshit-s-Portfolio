@@ -7,6 +7,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { getPortfolioData } from '@/lib/dataCache';
 
 const techStack = [
     { name: "TypeScript", src: "/icons/typescript.svg" },
@@ -40,24 +41,18 @@ export default function Activity() {
     const [githubUsername, setGithubUsername] = useState("");
 
     useEffect(() => {
-        fetch(`/api/admin/profile?t=${Date.now()}`)
-            .then(res => res.json())
+        getPortfolioData()
             .then(data => {
-                if (data.success && data.data.github) {
-                    // Extract username from github URL (e.g. "https://github.com/username")
-                    const url = data.data.github.trim();
-                    if (url.includes('github.com')) {
-                        const parts = url.split('/');
-                        const username = parts[parts.length - 1] || parts[parts.length - 2];
-                        if (username && username.toLowerCase() !== 'github.com') {
-                            setGithubUsername(username);
-                            return;
-                        }
+                const github = data?.profile?.github?.trim();
+                if (github?.includes('github.com')) {
+                    const parts = github.split('/');
+                    const username = parts[parts.length - 1] || parts[parts.length - 2];
+                    if (username && username.toLowerCase() !== 'github.com') {
+                        setGithubUsername(username);
+                        return;
                     }
                 }
-                // Fallback to env or empty
-                const envUsername = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "";
-                setGithubUsername(envUsername);
+                setGithubUsername(process.env.NEXT_PUBLIC_GITHUB_USERNAME || "");
             })
             .catch(err => {
                 console.error("Failed to load activity profile:", err);

@@ -10,21 +10,14 @@ import TechBadge from '../tech-badge'
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
+import { getPortfolioData } from '@/lib/dataCache';
 
 export default function Hero() {
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
-        fetch(`/api/admin/profile?t=${Date.now()}`)
-            .then(res => {
-                if (!res.ok) throw new Error("Server error " + res.status);
-                return res.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    setProfile(data.data);
-                }
-            })
+        getPortfolioData()
+            .then(data => { if (data?.profile) setProfile(data.profile); })
             .catch(err => console.error("Failed to load profile in hero:", err));
     }, []);
 

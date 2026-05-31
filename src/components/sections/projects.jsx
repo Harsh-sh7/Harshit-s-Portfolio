@@ -10,24 +10,20 @@ import {
 import { Globe, ArrowUpRight } from 'lucide-react'
 import { FiGithub } from "react-icons/fi"
 import Link from 'next/link'
+import { getPortfolioData } from '@/lib/dataCache';
 
 export default function Projects() {
     const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetch(`/api/admin/projects?t=${Date.now()}`)
-            .then(res => {
-                if (!res.ok) throw new Error("Server error " + res.status);
-                return res.json();
-            })
+        getPortfolioData()
             .then(data => {
-                if (data.success) {
-                    // Filter visible projects and show top 4
-                    const visibleProjects = data.data.filter(p => p.isVisible !== false);
-                    setProjects(visibleProjects.slice(0, 4))
+                if (data?.projects) {
+                    const visible = data.projects.filter(p => p.isVisible !== false);
+                    setProjects(visible.slice(0, 4));
                 }
-                setLoading(false)
+                setLoading(false);
             })
             .catch((err) => {
                 console.error("Failed to load projects:", err);
