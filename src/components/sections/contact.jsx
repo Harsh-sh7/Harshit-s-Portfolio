@@ -1,14 +1,27 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Calendar, Mail, ArrowUpRight, Loader2, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { FiLinkedin } from "react-icons/fi";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { socialLinks } from '@/lib/config';
 
 export default function Contact() {
     const [status, setStatus] = useState('idle');
+    const [profile, setProfile] = useState(null);
+
+    useEffect(() => {
+        fetch(`/api/admin/profile?t=${Date.now()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setProfile(data.data);
+                }
+            })
+            .catch(err => console.error("Failed to load contact profile:", err));
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -59,7 +72,7 @@ export default function Contact() {
                         <p className="text-sm text-muted-foreground leading-[1.6]">Choose your preferred method to connect and let's discuss your project.</p>
                     </div>
                     <div className="space-y-3">
-                        <a href="https://cal.com/qubydev/30min" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200 ease-out group">
+                        <a href={profile?.calcomUrl || socialLinks.calcom} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200 ease-out group">
                             <div className="text-muted-foreground group-hover:text-foreground transition-colors">
                                 <Calendar className='size-4.5' />
                             </div>
@@ -70,18 +83,18 @@ export default function Contact() {
                             <ArrowUpRight className='size-3.5 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors' />
                         </a>
 
-                        <a href="mailto:malay88patra@gmail.com" className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200 ease-out group">
+                        <a href={profile?.email ? `mailto:${profile.email}` : `mailto:${socialLinks.email}`} className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200 ease-out group">
                             <div className="text-muted-foreground group-hover:text-foreground transition-colors">
                                 <Mail className='size-4.5' />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-xs sm:text-sm text-foreground/80 mb-0.5 truncate">malay88patra@gmail.com</p>
+                                <p className="text-xs sm:text-sm text-foreground/80 mb-0.5 truncate">{profile?.email || socialLinks.email}</p>
                                 <p className="text-[10px] sm:text-xs text-muted-foreground/60">Quick inquiries &amp; questions</p>
                             </div>
                             <ArrowUpRight className='size-3.5 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors' />
                         </a>
 
-                        <a href="https://www.linkedin.com/in/qubydev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200 ease-out group">
+                        <a href={profile?.linkedin || socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200 ease-out group">
                             <div className="text-muted-foreground group-hover:text-foreground transition-colors">
                                 <FiLinkedin className='size-4.5' />
                             </div>

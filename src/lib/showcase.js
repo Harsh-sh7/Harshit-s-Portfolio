@@ -3,59 +3,28 @@ export const SHOWCASE_DATA = [
         category: "projects",
         items: [
             {
-                title: "Adotion",
-                link: "https://www.adotion.pro",
+                title: "NLP Research Analyzer",
+                link: "#",
+                github: "https://github.com",
                 image: "/projects/adotion.png",
-                description: "Save any meta ad in one click directly into your notion database with permanent video link.",
-                tech: [
-                    { name: "Plasmo", icon: "/icons/plasmo.svg", invertDark: true },
-                    { name: "Next.js", icon: "/icons/nextjs.svg", invertDark: true },
-                    { name: "React", icon: "/icons/react.svg" },
-                    { name: "Supabase", icon: "/icons/supabase.svg" },
-                ]
-            },
-            {
-                title: "Infia",
-                link: "https://infia.vercel.app",
-                github: "https://github.com/qubydev/infia",
-                image: "/projects/infia.png",
-                description: "Infia does it for you! Click and connect with a large number of available applications.",
+                description: "Built a multi-page Streamlit platform integrating NLP pipelines with agentic GenAI for automated research workflows.",
                 tech: [
                     { name: "LangGraph", icon: "/icons/langgraph.svg" },
-                    { name: "Next.js", icon: "/icons/nextjs.svg", invertDark: true },
+                    { name: "Python", icon: "/icons/python.svg" },
+                ]
+            },
+            {
+                title: "NotAI",
+                link: "#",
+                github: "https://github.com",
+                image: "/projects/infia.png",
+                description: "Built AI-powered code understanding platform for faster developer workflows with real-time execution and Gemini-powered insights.",
+                tech: [
                     { name: "React", icon: "/icons/react.svg" },
-                    { name: "Tailwind CSS", icon: "/icons/tailwindcss.svg" },
+                    { name: "Next.js", icon: "/icons/nextjs.svg", invertDark: true },
                     { name: "MongoDB", icon: "/icons/mongodb.svg" },
                 ]
-            },
-            {
-                title: "Logo Cat",
-                link: "https://logocat.vercel.app",
-                github: "https://github.com/qubydev/logocat",
-                image: "/projects/logocat.png",
-                description: "Fetch logo of any given site link using smart extraction technique.",
-                tech: [
-                    { name: "LangChain", icon: "/icons/langchain.svg", invertDark: true },
-                    { name: "Next.js", icon: "/icons/nextjs.svg", invertDark: true },
-                    { name: "React", icon: "/icons/react.svg" },
-                    { name: "Tailwind CSS", icon: "/icons/tailwindcss.svg" },
-                    { name: "Figma", icon: "/icons/figma.svg" },
-                ]
-            },
-            {
-                title: "Fullstack Sheet",
-                link: "https://www.fullstacksheet.tech",
-                github: "https://github.com/qubydev/full-stack-sheet",
-                image: "/projects/fullstacksheet.png",
-                description: "A high quality free roadmap for learning full-stack development.",
-                tech: [
-                    { name: "Next.js", icon: "/icons/nextjs.svg", invertDark: true },
-                    { name: "React", icon: "/icons/react.svg" },
-                    { name: "Tailwind CSS", icon: "/icons/tailwindcss.svg" },
-                    { name: "better-auth", icon: "/icons/better-auth.svg", invertDark: true },
-                    { name: "shadcn/ui", icon: "/icons/shadcnui.svg", invertDark: true },
-                ]
-            },
+            }
         ]
     },
     {

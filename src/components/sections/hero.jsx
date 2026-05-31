@@ -1,7 +1,9 @@
-import React from 'react'
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { Code2, MapPin, Mail, Clock, Globe, User2 } from 'lucide-react'
 import { FileText } from 'lucide-react'
-import { SiGithub, SiX } from "react-icons/si";
+import { SiGithub, SiX, SiLeetcode } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
 import RelativeTime from '../relative-time'
 import TechBadge from '../tech-badge'
@@ -10,24 +12,44 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 
 export default function Hero() {
+    const [profile, setProfile] = useState(null);
+
+    useEffect(() => {
+        fetch(`/api/admin/profile?t=${Date.now()}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Server error " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    setProfile(data.data);
+                }
+            })
+            .catch(err => console.error("Failed to load profile in hero:", err));
+    }, []);
+
+    if (!profile) return <div className="h-[400px] animate-pulse bg-muted rounded-xl"></div>;
+
     return (
         <section>
-            <div className="md:mb-8 mb-6 flex flex-row items-start gap-3.5 md:gap-4">
+            <div className="md:mb-8 mb-6 flex flex-row items-start gap-3.5 md:gap-4 relative">
                 <img
-                    alt="Malay Patra"
+                    alt={profile.name}
                     className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-border shrink-0"
-                    src="/quby.jpg"
+                    src={profile.imageUrl}
                 />
                 <div className="flex flex-col md:gap-1 gap-0.5 flex-1">
                     <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-col sm:flex-row">
-                        <h1 className="text-2xl font-inter sm:text-3xl md:text-4xl font-semibold tracking-normal">Malay Patra</h1>
+                        <h1 className="text-2xl font-inter sm:text-3xl md:text-4xl font-semibold tracking-normal">
+                            {profile.name}
+                        </h1>
                         <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted border border-border">
                             <div className="w-2 h-2 rounded-full bg-green-500" />
                             <span className="text-xs font-inter text-muted-foreground">Available for work</span>
                         </div>
                     </div>
                     <p className="text-muted-foreground text-sm sm:text-lg">
-                        Full-Stack Developer
+                        {profile.role}
                     </p>
                 </div>
             </div>
@@ -40,7 +62,7 @@ export default function Hero() {
                                 <Code2 className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
                             </span>
                             <div className="flex items-center gap-1.5 md:gap-2">
-                                <span className="text-xs text-muted-foreground md:text-sm">Full-Stack Developer</span>
+                                <span className="text-xs text-muted-foreground md:text-sm">{profile.role}</span>
                             </div>
                         </div>
 
@@ -49,7 +71,7 @@ export default function Hero() {
                                 <MapPin className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
                             </span>
                             <div className="flex items-center gap-1.5 md:gap-2">
-                                <span className="text-xs text-muted-foreground md:text-sm">Kolkata, West Bengal, India</span>
+                                <span className="text-xs text-muted-foreground md:text-sm">{profile.location}</span>
                             </div>
                         </div>
 
@@ -58,7 +80,9 @@ export default function Hero() {
                                 <Mail className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
                             </span>
                             <div className="flex items-center gap-1.5 md:gap-2">
-                                <a href="mailto:malay88patra@gmail.com" target="_blank" className="text-xs text-muted-foreground transition-all ease-in-out hover:underline md:text-sm">malay88patra@gmail.com</a>
+                                <a href={`mailto:${profile.email}`} target="_blank" className="text-xs text-muted-foreground transition-all ease-in-out hover:underline md:text-sm">
+                                    {profile.email}
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -78,7 +102,9 @@ export default function Hero() {
                                 <Globe className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
                             </span>
                             <div className="flex items-center gap-1.5 md:gap-2">
-                                <a href="https://qubydev.vercel.app" target="_blank" className="text-xs text-muted-foreground transition-all ease-in-out hover:underline md:text-sm">qubydev.vercel.app</a>
+                                <a href={profile.portfolioUrl} target="_blank" className="text-xs text-muted-foreground transition-all ease-in-out hover:underline md:text-sm">
+                                    {profile.portfolioUrl.replace(/^https?:\/\//, '')}
+                                </a>
                             </div>
                         </div>
 
@@ -96,68 +122,14 @@ export default function Hero() {
 
             <div className="mb-5 md:mb-8">
                 <p className="text-sm leading-loose text-muted-foreground sm:text-[15px] sm:leading-[2.3]">
-                    I build interactive web apps using{" "}
-                    <TechBadge
-                        href="https://www.typescriptlang.org/"
-                        icon="/icons/typescript.svg"
-                        className="bg-blue-500/10 text-blue-400"
-                    >
-                        TypeScript
-                    </TechBadge>
-                    ,{" "}
-                    <TechBadge
-                        href="https://react.dev/"
-                        icon="/icons/react.svg"
-                        className="bg-cyan-500/10 text-cyan-400"
-                    >
-                        React
-                    </TechBadge>
-                    ,{" "}
-                    <TechBadge
-                        href="https://nextjs.org/"
-                        icon="/icons/nextjs.svg"
-                        className="bg-primary/10 text-foreground"
-                        darkInvert
-                    >
-                        Next.js
-                    </TechBadge>
-                    , and{" "}
-                    <TechBadge
-                        href="https://tailwindcss.com/"
-                        icon="/icons/tailwindcss.svg"
-                        className="bg-sky-500/10 text-sky-400"
-                    >
-                        Tailwind CSS
-                    </TechBadge>
-                    . I also integrate agentic AI into my applications using{" "}
-                    <TechBadge
-                        href="https://langchain.com/"
-                        icon="/icons/langchain.svg"
-                        className="bg-primary/10 text-foreground"
-                        darkInvert
-                    >
-                        LangChain
-                    </TechBadge>
-                    {" and "}
-                    <TechBadge
-                        href="https://langchain.com/langgraph"
-                        icon="/icons/langgraph.svg"
-                        className="bg-[#4ba9f0]/10 text-[#4ba9f0]"
-                    >
-                        LangGraph
-                    </TechBadge>
-                    {" . "}
-                    <Link href={"/about"} className="link flex items-center">
-                        Read more <ArrowUpRight className="h-4 w-4" />
-                    </Link>
+                    {profile.bio}
                 </p>
             </div>
 
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2 mt-6">
                 <div className="flex flex-wrap items-center gap-2">
                     <Button size="sm" asChild className="h-9 gap-2">
-                        <a href="https://drive.google.com/file/d/1ndeSxjR6InKTRdrs69jDwf1PTqHN_JSt/view" target="_blank" rel="noopener noreferrer">
+                        <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">
                             <FileText className="h-4 w-4" strokeWidth={1.5} />
                             <span className="text-[13px] font-light">Resume</span>
                         </a>
@@ -174,27 +146,21 @@ export default function Hero() {
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="mx-1 hidden h-5 w-px bg-border sm:block" />
 
-                    <Button variant="outline" size="icon" asChild className="h-9 w-9">
-                        <a href="https://www.linkedin.com/in/qubydev" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <Button variant="outline" size="icon" asChild className="h-9 w-9 relative group">
+                        <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                             <FaLinkedin className="h-4 w-4" />
                         </a>
                     </Button>
 
-                    <Button variant="outline" size="icon" asChild className="h-9 w-9">
-                        <a href="https://x.com/qubydev" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
-                            <SiX className="h-4 w-4" />
-                        </a>
-                    </Button>
-
-                    <Button variant="outline" size="icon" asChild className="h-9 w-9">
-                        <a href="https://github.com/qubydev" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <Button variant="outline" size="icon" asChild className="h-9 w-9 relative group">
+                        <a href={profile.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
                             <SiGithub className="h-4 w-4" />
                         </a>
                     </Button>
 
-                    <Button variant="outline" size="icon" asChild className="h-9 w-9">
-                        <a href="mailto:malay88patra@gmail.com" target="_blank" rel="noopener noreferrer" aria-label="Email">
-                            <Mail className="h-4 w-4" strokeWidth={1.5} />
+                    <Button variant="outline" size="icon" asChild className="h-9 w-9 relative group">
+                        <a href={profile.leetcode} target="_blank" rel="noopener noreferrer" aria-label="LeetCode">
+                            <SiLeetcode className="h-4 w-4" />
                         </a>
                     </Button>
                 </div>

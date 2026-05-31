@@ -1,34 +1,45 @@
-import React from 'react'
+"use client";
+
+import React, { useState, useEffect } from 'react'
 
 export default function Experience() {
-    const experiences = [
-        {
-            title: "SDE Intern",
-            company: "Souloxy",
-            location: "Remote",
-            date: "May 2025 - Jan 2026",
-            logo: "/souloxy.png",
-            description: "Worked closely with the core development team of souloxy as a Full-Stack developer. Gained experience working in a live production environment.",
-            bullets: [
-                "Migrated codebase to latest libraries such as Vite and Tailwind CSS",
-                "Learned to work with live production database (PostgreSQL)",
-                "Implemented backend security features and optimized API performance"
-            ]
-        },
-        {
-            title: "Freelancer",
-            company: "Upwork",
-            location: "Remote",
-            date: "Apr 2023 - Sept 2025",
-            logo: "/upwork.svg",
-            description: "Delivered fully automated & AI integrated softwares to clients across the globe, making their life easier.",
-            bullets: [
-                "Expert in data scraping using selenium/puppeteer + proxy + captcha solving",
-                "Developed automated solution to problems faced by my clients",
-                "Integrated AI to enhance the functionality of the softwares"
-            ]
-        }
-    ]
+    const [experiences, setExperiences] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetch(`/api/admin/experiences?t=${Date.now()}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Server error " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const visibleExperiences = data.data.filter(exp => exp.isVisible !== false);
+                    setExperiences(visibleExperiences);
+                }
+                setLoading(false)
+            })
+            .catch((err) => {
+                console.error("Failed to load experiences:", err);
+                setLoading(false);
+            })
+    }, [])
+
+    if (loading) {
+        return (
+            <section className="mt-20">
+                <h2 className="mb-4 text-xs uppercase tracking-widest text-muted-foreground">Experience</h2>
+                <div className="flex flex-col gap-4 animate-pulse">
+                    <div className="h-32 bg-muted rounded-xl"></div>
+                    <div className="h-32 bg-muted rounded-xl"></div>
+                </div>
+            </section>
+        )
+    }
+
+    if (experiences.length === 0) {
+        return null;
+    }
 
     return (
         <section className="mt-20">
@@ -41,7 +52,7 @@ export default function Experience() {
                                 {exp.logo ? (
                                     <img src={exp.logo} alt={`${exp.company} logo`} className="w-full h-full object-contain" />
                                 ) : (
-                                    <div className="w-full h-full bg-muted"></div>
+                                    <div className="w-full h-full bg-muted flex items-center justify-center font-bold text-muted-foreground">{exp.company.charAt(0)}</div>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -50,14 +61,18 @@ export default function Experience() {
                                 </div>
                                 <div className="flex items-center gap-2 mt-1 text-xs sm:text-sm flex-wrap">
                                     <span className="font-medium text-foreground/70">{exp.company}</span>
-                                    <span className="text-muted-foreground/50">•</span>
-                                    <span className="text-muted-foreground/60">{exp.location}</span>
+                                    {exp.location && (
+                                        <>
+                                            <span className="text-muted-foreground/50">•</span>
+                                            <span className="text-muted-foreground/60">{exp.location}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             <span className="text-[10px] sm:text-xs text-muted-foreground/60 whitespace-nowrap shrink-0">{exp.date}</span>
                         </div>
                         {exp.description && (
-                            <p className="text-foreground/70 text-xs sm:text-sm leading-relaxed mb-3">
+                            <p className="text-foreground/70 text-xs sm:text-sm leading-relaxed mb-3 whitespace-pre-wrap">
                                 {exp.description}
                             </p>
                         )}

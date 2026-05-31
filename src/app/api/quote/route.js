@@ -4,17 +4,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const apiKey = process.env.API_NINJA_API_KEY;
-        
-        if (!apiKey) {
-            return NextResponse.json({ error: "API key not configured" }, { status: 500 });
-        }
-
-        const response = await fetch('https://api.api-ninjas.com/v2/randomquotes?categories=success,wisdom', {
-            headers: {
-                'X-Api-Key': apiKey,
-                'Content-Type': 'application/json'
-            },
+        const response = await fetch('https://dummyjson.com/quotes/random', {
             cache: 'no-store'
         });
 
@@ -24,8 +14,8 @@ export async function GET() {
 
         const data = await response.json();
         
-        if (Array.isArray(data) && data.length > 0) {
-            return NextResponse.json(data[0]);
+        if (data && data.quote) {
+            return NextResponse.json(data);
         } else {
             throw new Error("Invalid response format");
         }

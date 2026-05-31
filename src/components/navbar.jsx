@@ -1,4 +1,6 @@
-import React from 'react'
+"use client";
+
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import ThemeToggle from './theme-toggle'
 import {
@@ -19,13 +21,26 @@ const links = [
 import NavLinks from './nav-links';
 
 export default function Navbar() {
+    const [logoName, setLogoName] = useState("portfolio");
+
+    useEffect(() => {
+        fetch(`/api/admin/profile?t=${Date.now()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data.name) {
+                    const firstName = data.data.name.split(' ')[0].toLowerCase();
+                    setLogoName(firstName);
+                }
+            })
+            .catch(err => console.error("Failed to load navbar name:", err));
+    }, []);
 
     return (
         <div className='h-16 fixed left-0 top-0 w-full bg-background z-100'>
             <nav className='w-full max-w-3xl mx-auto px-6 flex items-center h-full'>
                 <Link className="text-sm font-medium tracking-tight flex items-center" href="/">
                     <span className="text-muted-foreground">~/</span>
-                    <HyperText className={"text-sm"}>qubydev</HyperText>
+                    <HyperText className={"text-sm"}>{logoName}</HyperText>
                 </Link>
 
                 <div className="flex items-center gap-2 ml-auto">

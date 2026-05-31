@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { SHOWCASE_DATA } from '@/lib/showcase';
 
 function FolderIcon({ className }) {
     return (
@@ -37,10 +36,28 @@ function FolderIcon({ className }) {
 
 export default function Showcase() {
     const router = useRouter();
+    const [folders, setFolders] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch(`/api/admin/showcase?t=${Date.now()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const virtualProjectsFolder = {
+                        _id: "virtual-projects",
+                        category: "Projects"
+                    };
+                    setFolders([virtualProjectsFolder, ...data.data]);
+                }
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
+    }, []);
 
     return (
         <main
-            className='px-6 pb-12 pt-36 w-full max-w-3xl mx-auto h-[calc(100vh-5rem)]'
+            className='px-6 pb-12 pt-36 w-full max-w-3xl mx-auto min-h-[calc(100vh-5rem)]'
         >
             <div className="mb-8">
                 <h1 className='text-3xl font-bold capitalize'>Showcase</h1>
@@ -48,25 +65,33 @@ export default function Showcase() {
                     Explore my creations gallery.
                 </p>
             </div>
-            <div className='flex flex-wrap content-start text-foreground gap-4'>
-                {SHOWCASE_DATA.map(folder => {
-                    return (
-                        <div
-                            key={folder.category}
-                            tabIndex={0}
-                            onClick={(e) => router.push(`/showcase/${folder.category}`)}
-                            className="flex flex-col items-center gap-2 p-3 rounded-md cursor-pointer select-none transition-colors w-28 hover:bg-muted group"
-                        >
-                            <FolderIcon className='size-16 pointer-events-none' />
-                            <span
-                                className="text-xs text-center w-full truncate px-1 text-muted-foreground group-hover:text-primary font-semibold"
+            
+            {loading ? (
+                <div className="animate-pulse flex gap-4">
+                    <div className="w-28 h-24 bg-muted rounded-md"></div>
+                    <div className="w-28 h-24 bg-muted rounded-md"></div>
+                </div>
+            ) : (
+                <div className='flex flex-wrap content-start text-foreground gap-4'>
+                    {folders.map(folder => {
+                        return (
+                            <div
+                                key={folder.category}
+                                tabIndex={0}
+                                onClick={(e) => router.push(`/showcase/${encodeURIComponent(folder.category)}`)}
+                                className="flex flex-col items-center gap-2 p-3 rounded-md cursor-pointer select-none transition-colors w-28 hover:bg-muted group"
                             >
-                                {folder.category}
-                            </span>
-                        </div>
-                    );
-                })}
-            </div>
+                                <FolderIcon className='size-16 pointer-events-none' />
+                                <span
+                                    className="text-xs text-center w-full truncate px-1 text-muted-foreground group-hover:text-primary font-semibold"
+                                >
+                                    {folder.category}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </main>
     );
 }
