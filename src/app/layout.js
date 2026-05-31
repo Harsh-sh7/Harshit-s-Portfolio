@@ -20,7 +20,7 @@ export async function generateMetadata() {
         title: profile.name || "Developer Portfolio",
         description: profile.bio || "Professional Developer Portfolio",
         icons: {
-          icon: profile.imageUrl || "/quby.jpg",
+          icon: profile.imageUrl || "",
         }
       };
     }

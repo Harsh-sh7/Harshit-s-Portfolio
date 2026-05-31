@@ -14,7 +14,7 @@ const ProfileSchema = new mongoose.Schema({
   leetcode: { type: String, default: "https://leetcode.com" },
   resumeUrl: { type: String, default: "/resume.pdf" },
   calcomUrl: { type: String, default: "https://cal.com" },
-  imageUrl: { type: String, default: "/quby.jpg" },
+  imageUrl: { type: String, default: "" },
   // About Page specific fields
   aboutHeading1: { type: String, default: "I solve problems," },
   aboutHeading2: { type: String, default: "they call it coding." },
@@ -32,11 +32,7 @@ const ProfileSchema = new mongoose.Schema({
         subtitle: String
       }
     ],
-    default: [
-      { id: "gallery-0", src: "/gallery/0.png", title: "Designing", subtitle: "I enjoy styling and interface design" },
-      { id: "gallery-1", src: "/gallery/1.png", title: "Books", subtitle: "I read technical books and documentation" },
-      { id: "gallery-2", src: "/gallery/2.png", title: "Traveling", subtitle: "I love exploring new places" }
-    ]
+    default: []
   }
 }, { timestamps: true });
 

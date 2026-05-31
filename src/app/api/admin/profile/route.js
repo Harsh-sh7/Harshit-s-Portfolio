@@ -25,7 +25,7 @@ export async function GET() {
         leetcode: socialLinks.leetcode,
         resumeUrl: socialLinks.resume,
         calcomUrl: socialLinks.calcom,
-        imageUrl: "/quby.jpg",
+        imageUrl: "",
         twitter: "https://x.com"
       });
     }
@@ -40,11 +40,7 @@ export async function GET() {
     }
     if (!profileObj.twitter) profileObj.twitter = "https://x.com";
     if (!profileObj.aboutGallery) {
-      profileObj.aboutGallery = [
-        { id: "gallery-0", src: "/gallery/0.png", title: "Designing", subtitle: "I enjoy styling and interface design" },
-        { id: "gallery-1", src: "/gallery/1.png", title: "Books", subtitle: "I read technical books and documentation" },
-        { id: "gallery-2", src: "/gallery/2.png", title: "Traveling", subtitle: "I love exploring new places" }
-      ];
+      profileObj.aboutGallery = [];
     }
 
     return NextResponse.json(
