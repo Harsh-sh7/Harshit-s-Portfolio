@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Globe, Edit2, Eye, EyeOff, GripVertical } from "lucide-react";
+import { Plus, Trash2, Globe, Edit2, Eye, EyeOff, GripVertical, X } from "lucide-react";
 import { FiGithub } from "react-icons/fi";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -34,6 +34,14 @@ function SortableProject({ proj, handleEditClick, handleDelete, handleToggleVisi
           </div>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2 mt-1 mb-2">{proj.description}</p>
+        {Array.isArray(proj.tech) && proj.tech.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {proj.tech.slice(0, 5).map((t, i) => (
+              <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-muted border border-border/50 text-muted-foreground font-mono">{typeof t === 'string' ? t : t?.name || ''}</span>
+            ))}
+            {proj.tech.length > 5 && <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">+{proj.tech.length - 5}</span>}
+          </div>
+        )}
         <div className="mt-auto flex gap-3">
           {proj.link && <a href={proj.link} target="_blank" className="text-muted-foreground hover:text-foreground"><Globe size={16}/></a>}
           {proj.github && <a href={proj.github} target="_blank" className="text-muted-foreground hover:text-foreground"><FiGithub size={16}/></a>}
@@ -42,6 +50,63 @@ function SortableProject({ proj, handleEditClick, handleDelete, handleToggleVisi
     </div>
   );
 }
+
+const mapTechNameToObject = (name) => {
+  if (typeof name !== 'string') return name;
+  const clean = name.trim();
+  const lower = clean.toLowerCase().replace(/[\s\.\-\/]/g, '');
+  
+  const localMap = {
+    'react': { name: 'React', icon: '/icons/react.svg' },
+    'nextjs': { name: 'Next.js', icon: '/icons/nextjs.svg', invertDark: true },
+    'next.js': { name: 'Next.js', icon: '/icons/nextjs.svg', invertDark: true },
+    'mongodb': { name: 'MongoDB', icon: '/icons/mongodb.svg' },
+    'mongo': { name: 'MongoDB', icon: '/icons/mongodb.svg' },
+    'nodejs': { name: 'Node.js', icon: '/icons/nodejs.svg' },
+    'node.js': { name: 'Node.js', icon: '/icons/nodejs.svg' },
+    'node': { name: 'Node.js', icon: '/icons/nodejs.svg' },
+    'betterauth': { name: 'Better Auth', icon: '/icons/better-auth.svg' },
+    'cplusplus': { name: 'C++', icon: '/icons/cplusplus.svg' },
+    'c++': { name: 'C++', icon: '/icons/cplusplus.svg' },
+    'express': { name: 'Express', icon: '/icons/express.svg' },
+    'expressjs': { name: 'Express', icon: '/icons/express.svg' },
+    'express.js': { name: 'Express', icon: '/icons/express.svg' },
+    'figma': { name: 'Figma', icon: '/icons/figma.svg' },
+    'git': { name: 'Git', icon: '/icons/git.svg' },
+    'github': { name: 'GitHub', icon: '/icons/github.svg' },
+    'javascript': { name: 'JavaScript', icon: '/icons/javascript.svg' },
+    'js': { name: 'JavaScript', icon: '/icons/javascript.svg' },
+    'langchain': { name: 'LangChain', icon: '/icons/langchain.svg' },
+    'langgraph': { name: 'LangGraph', icon: '/icons/langgraph.svg' },
+    'plasmo': { name: 'Plasmo', icon: '/icons/plasmo.svg' },
+    'postgresql': { name: 'PostgreSQL', icon: '/icons/postgresql.svg' },
+    'postgres': { name: 'PostgreSQL', icon: '/icons/postgresql.svg' },
+    'postman': { name: 'Postman', icon: '/icons/postman.svg' },
+    'python': { name: 'Python', icon: '/icons/python.svg' },
+    'shadcnui': { name: 'shadcn/ui', icon: '/icons/shadcnui.svg', invertDark: true },
+    'shadcn/ui': { name: 'shadcn/ui', icon: '/icons/shadcnui.svg', invertDark: true },
+    'shadcn': { name: 'shadcn/ui', icon: '/icons/shadcnui.svg', invertDark: true },
+    'supabase': { name: 'Supabase', icon: '/icons/supabase.svg' },
+    'tailwindcss': { name: 'TailwindCSS', icon: '/icons/tailwindcss.svg' },
+    'tailwind': { name: 'TailwindCSS', icon: '/icons/tailwindcss.svg' },
+    'typescript': { name: 'TypeScript', icon: '/icons/typescript.svg' },
+    'ts': { name: 'TypeScript', icon: '/icons/typescript.svg' },
+  };
+
+  if (localMap[lower]) {
+    return localMap[lower];
+  }
+
+  let deviconName = clean.toLowerCase()
+    .replace('++', 'plusplus')
+    .replace('#', 'sharp')
+    .replace(/[\s\.\-\/]/g, '');
+    
+  return {
+    name: clean,
+    icon: `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${deviconName}/${deviconName}-original.svg`,
+  };
+};
 
 export default function ProjectsTab() {
   const [projects, setProjects] = useState([]);
@@ -57,6 +122,10 @@ export default function ProjectsTab() {
   const [existingImage, setExistingImage] = useState("");
   const [isVisible, setIsVisible] = useState(true);
   const [uploading, setUploading] = useState(false);
+
+  // Tech stack tag input
+  const [techStack, setTechStack] = useState([]);   // array of strings
+  const [techInput, setTechInput] = useState("");
 
   // Case Study State
   const [subtitle, setSubtitle] = useState("");
@@ -81,6 +150,9 @@ export default function ProjectsTab() {
     setLoading(false);
   };
 
+  // Normalise tech entry: could be string or {name, icon} object
+  const normTech = (t) => (typeof t === 'string' ? t : t?.name || '');
+
   const handleEditClick = (proj) => {
     setEditingId(proj._id);
     setTitle(proj.title);
@@ -91,6 +163,8 @@ export default function ProjectsTab() {
     setIsVisible(proj.isVisible !== false);
     setSubtitle(proj.caseStudy?.subtitle || "");
     setCaseStudyBlocks(proj.caseStudy?.blocks || []);
+    setTechStack((proj.tech || []).map(normTech).filter(Boolean));
+    setTechInput("");
     setImageFile(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -105,7 +179,28 @@ export default function ProjectsTab() {
     setIsVisible(true);
     setSubtitle("");
     setCaseStudyBlocks([]);
+    setTechStack([]);
+    setTechInput("");
     setImageFile(null);
+  };
+
+  // ── Tech tag helpers ──────────────────────────────────────────────────────
+  const addTech = (value) => {
+    const trimmed = value.trim().replace(/,$/, '').trim();
+    if (!trimmed || techStack.includes(trimmed)) return;
+    setTechStack(prev => [...prev, trimmed]);
+  };
+
+  const removeTech = (index) => setTechStack(prev => prev.filter((_, i) => i !== index));
+
+  const handleTechKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTech(techInput);
+      setTechInput("");
+    } else if (e.key === 'Backspace' && techInput === '' && techStack.length > 0) {
+      removeTech(techStack.length - 1);
+    }
   };
 
   const addTextBlock = () => {
@@ -297,9 +392,15 @@ export default function ProjectsTab() {
       }
     }
 
+    // Commit any un-submitted tag input
+    const finalTech = techInput.trim()
+      ? [...new Set([...techStack, techInput.trim()])]
+      : techStack;
+
     const projectData = {
       title,
       description,
+      tech: finalTech.map(mapTechNameToObject),
       link,
       github,
       image: imageUrl,
@@ -412,6 +513,43 @@ export default function ProjectsTab() {
               <label className="text-sm font-medium">Description</label>
               <textarea required value={description} onChange={e=>setDescription(e.target.value)} className="w-full p-2 rounded bg-background border border-border text-sm min-h-[80px]" placeholder="Brief project description..." />
             </div>
+
+            {/* ── Tech Stack Tag Input ── */}
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-medium">Tech Stack</label>
+              <div
+                className="flex flex-wrap gap-2 p-2 rounded bg-background border border-border min-h-[42px] cursor-text focus-within:ring-2 focus-within:ring-primary/40"
+                onClick={() => document.getElementById('tech-input').focus()}
+              >
+                {techStack.map((tech, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary"
+                  >
+                    {tech}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removeTech(i); }}
+                      className="hover:text-red-500 transition-colors"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  id="tech-input"
+                  type="text"
+                  value={techInput}
+                  onChange={e => setTechInput(e.target.value)}
+                  onKeyDown={handleTechKeyDown}
+                  onBlur={() => { if (techInput.trim()) { addTech(techInput); setTechInput(""); } }}
+                  placeholder={techStack.length === 0 ? "Type a tech and press Enter or comma  (e.g. React, Node.js, MongoDB)" : "Add more..."}
+                  className="flex-1 min-w-[160px] bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Press <kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">Enter</kbd> or <kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">,</kbd> to add · <kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px]">Backspace</kbd> to remove last</p>
+            </div>
+
             <div className="space-y-1 md:col-span-2 flex items-center gap-2">
               <input type="checkbox" id="isVisible" checked={isVisible} onChange={e=>setIsVisible(e.target.checked)} className="rounded border-border text-primary focus:ring-primary" />
               <label htmlFor="isVisible" className="text-sm font-medium">Show in Portfolio</label>
