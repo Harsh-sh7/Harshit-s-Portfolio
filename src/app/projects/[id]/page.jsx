@@ -1,10 +1,32 @@
 "use client";
 
-import React, { use, useState, useEffect } from 'react';
+import React, { use, useState, useEffect, useRef } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import { Globe, ChevronLeft, Heart, Link as LinkIcon, Share2, MessageSquare, ArrowUpRight } from 'lucide-react';
 import { FiGithub } from "react-icons/fi";
 import Link from 'next/link';
+import { getPortfolioData } from '@/lib/dataCache';
+
+// Lazy video: only starts loading when near the viewport
+function LazyVideo({ src, className, ...props }) {
+    const ref = useRef(null);
+    const [inView, setInView] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+            { rootMargin: '200px' }
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+    return (
+        <div ref={ref} className={className} style={{ minHeight: '200px' }}>
+            {inView && <video src={src} className="w-full h-full object-cover" autoPlay loop muted playsInline preload="metadata" {...props} />}
+        </div>
+    );
+}
 
 const renderMarkdown = (text) => {
     if (!text) return "";
@@ -47,13 +69,9 @@ export default function ProjectDetailPage({ params }) {
 
     useEffect(() => {
         fetchProject();
-        fetch(`/api/admin/profile?t=${Date.now()}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.data.name) {
-                    setProfileName(data.data.name);
-                }
-            })
+        // Read from shared cache — no extra network request
+        getPortfolioData()
+            .then(data => { if (data?.profile?.name) setProfileName(data.profile.name); })
             .catch(err => console.error("Failed to load profile in project details:", err));
     }, [id]);
 
@@ -307,20 +325,18 @@ export default function ProjectDetailPage({ params }) {
                                                   ></iframe>
                                               </div>
                                           ) : (
-                                              <video 
-                                                  src={block.mediaUrl} 
-                                                  className="w-full aspect-video object-cover" 
-                                                  autoPlay
-                                                  loop
-                                                  muted
-                                                  playsInline
+                                              <LazyVideo
+                                                  src={block.mediaUrl}
+                                                  className="w-full aspect-video"
                                               />
                                           )
                                       ) : (
-                                          <img 
-                                              src={block.mediaUrl} 
-                                              alt={block.caption || "Showcase media"} 
-                                              className="w-full h-auto max-h-[600px] object-cover mx-auto" 
+                                          <img
+                                              src={block.mediaUrl}
+                                              alt={block.caption || "Showcase media"}
+                                              className="w-full h-auto max-h-[600px] object-cover mx-auto"
+                                              loading="lazy"
+                                              decoding="async"
                                           />
                                       )}
                                   </div>

@@ -7,19 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { socialLinks } from '@/lib/config';
+import { getPortfolioData } from '@/lib/dataCache';
 
 export default function Contact() {
     const [status, setStatus] = useState('idle');
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
-        fetch(`/api/admin/profile?t=${Date.now()}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setProfile(data.data);
-                }
-            })
+        getPortfolioData()
+            .then(data => { if (data?.profile) setProfile(data.profile); })
             .catch(err => console.error("Failed to load contact profile:", err));
     }, []);
 
