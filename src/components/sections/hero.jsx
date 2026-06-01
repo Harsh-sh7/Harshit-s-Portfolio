@@ -21,7 +21,36 @@ export default function Hero() {
             .catch(err => console.error("Failed to load profile in hero:", err));
     }, []);
 
-    if (!profile) return <div className="h-[400px] animate-pulse bg-muted rounded-xl"></div>;
+    if (!profile) return (
+        <section className="animate-pulse">
+            {/* Avatar + name row */}
+            <div className="md:mb-8 mb-6 flex flex-row items-start gap-3.5 md:gap-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-muted shrink-0" />
+                <div className="flex flex-col gap-2 flex-1 pt-1">
+                    <div className="h-7 w-48 bg-muted rounded-lg" />
+                    <div className="h-4 w-36 bg-muted rounded" />
+                </div>
+            </div>
+            {/* Info rows */}
+            <div className="mb-5 md:mb-10 grid grid-cols-1 gap-4 md:grid-cols-2">
+                {[1,2,3,4].map(i => (
+                    <div key={i} className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-muted shrink-0" />
+                        <div className="h-3.5 bg-muted rounded" style={{ width: `${60 + i * 8}%` }} />
+                    </div>
+                ))}
+            </div>
+            {/* Tech badges */}
+            <div className="flex flex-wrap gap-2 mb-6">
+                {[1,2,3,4,5].map(i => <div key={i} className="h-6 w-16 bg-muted rounded-full" />)}
+            </div>
+            {/* Buttons */}
+            <div className="flex gap-3">
+                <div className="h-9 w-32 bg-muted rounded-lg" />
+                <div className="h-9 w-28 bg-muted rounded-lg" />
+            </div>
+        </section>
+    );
 
     return (
         <section>

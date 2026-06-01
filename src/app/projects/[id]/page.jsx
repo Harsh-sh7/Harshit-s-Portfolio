@@ -5,7 +5,7 @@ import { notFound, useRouter } from 'next/navigation';
 import { Globe, ChevronLeft, Heart, Link as LinkIcon, Share2, MessageSquare, ArrowUpRight } from 'lucide-react';
 import { FiGithub } from "react-icons/fi";
 import Link from 'next/link';
-import { getPortfolioData } from '@/lib/dataCache';
+import { getPortfolioData, getProjectById } from '@/lib/dataCache';
 
 // Lazy video: only starts loading when near the viewport
 function LazyVideo({ src, className, ...props }) {
@@ -59,37 +59,51 @@ export default function ProjectDetailPage({ params }) {
     const resolvedParams = use(params);
     const id = resolvedParams.id;
     const router = useRouter();
-    
-    const [project, setProject] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [liked, setLiked] = useState(false);
+
+    const [project, setProject]       = useState(null);
+    const [loading, setLoading]       = useState(true);
+    const [liked, setLiked]           = useState(false);
     const [likesCount, setLikesCount] = useState(0);
-    const [profileName, setProfileName] = useState("Developer");
-    const [copied, setCopied] = useState(false);
+    const [profileName, setProfileName] = useState('Developer');
+    const [copied, setCopied]         = useState(false);
 
     useEffect(() => {
-        fetchProject();
-        // Read from shared cache — no extra network request
-        getPortfolioData()
-            .then(data => { if (data?.profile?.name) setProfileName(data.profile.name); })
-            .catch(err => console.error("Failed to load profile in project details:", err));
-    }, [id]);
+        let cancelled = false;
 
-    const fetchProject = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/projects/${id}`);
-            const data = await res.json();
-            if (data.success) {
-                setProject(data.data);
-                setLikesCount(data.data.caseStudy?.likes || 0);
+        async function load() {
+            // ── Try cache first (instant if user visited homepage first) ──
+            const cached = await getProjectById(id);
+            if (cancelled) return;
+
+            if (cached) {
+                setProject(cached);
+                setLikesCount(cached.caseStudy?.likes || 0);
+                setLoading(false);
+            } else {
+                // Deep-link fallback: fetch directly
+                try {
+                    const res  = await fetch(`/api/projects/${id}`);
+                    const data = await res.json();
+                    if (!cancelled && data.success) {
+                        setProject(data.data);
+                        setLikesCount(data.data.caseStudy?.likes || 0);
+                    }
+                } catch (err) {
+                    console.error('Error fetching project:', err);
+                } finally {
+                    if (!cancelled) setLoading(false);
+                }
             }
-        } catch (error) {
-            console.error("Error fetching project details:", error);
-        } finally {
-            setLoading(false);
+
+            // Profile name from shared cache — no extra request
+            getPortfolioData()
+                .then(data => { if (!cancelled && data?.profile?.name) setProfileName(data.profile.name); })
+                .catch(() => {});
         }
-    };
+
+        load();
+        return () => { cancelled = true; };
+    }, [id]);
 
     const handleLike = async () => {
         if (liked) return; // Prevent multiple likes in same session
@@ -133,10 +147,28 @@ export default function ProjectDetailPage({ params }) {
 
     if (loading) {
         return (
-            <main className='px-6 pb-24 pt-36 w-full max-w-4xl mx-auto min-h-screen flex flex-col justify-center items-center'>
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm text-muted-foreground font-medium">Loading project showcase...</span>
+            <main className='px-6 pb-24 pt-32 sm:pt-36 w-full max-w-4xl mx-auto'>
+                {/* Skeleton — matches real layout to avoid layout shift */}
+                <div className="animate-pulse space-y-8">
+                    {/* Back nav */}
+                    <div className="h-4 w-24 bg-muted rounded" />
+                    {/* Title + meta */}
+                    <div className="space-y-4">
+                        <div className="h-8 w-3/4 bg-muted rounded-lg" />
+                        <div className="h-5 w-1/2 bg-muted rounded" />
+                        <div className="flex gap-2 flex-wrap">
+                            {[1,2,3].map(i => <div key={i} className="h-6 w-16 bg-muted rounded-full" />)}
+                        </div>
+                    </div>
+                    {/* Hero image */}
+                    <div className="h-64 w-full bg-muted rounded-2xl" />
+                    {/* Content blocks */}
+                    <div className="space-y-3">
+                        <div className="h-4 bg-muted rounded w-full" />
+                        <div className="h-4 bg-muted rounded w-5/6" />
+                        <div className="h-4 bg-muted rounded w-4/6" />
+                    </div>
+                    <div className="h-48 w-full bg-muted rounded-2xl" />
                 </div>
             </main>
         );
