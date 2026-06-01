@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import crypto from 'crypto';
 
 function getExpectedToken() {
+  // ADMIN_PASSWORD must be set in environment variables
   const password = process.env.ADMIN_PASSWORD || 'admin123';
   return crypto.createHash('sha256').update(password).digest('hex');
 }
