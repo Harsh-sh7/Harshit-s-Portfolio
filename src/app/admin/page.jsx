@@ -107,9 +107,9 @@ export default function AdminPage() {
 
   useDevToolsDetection(handleDevToolsDetected);
 
-  // Check auth via server ping (since cookie is httpOnly)
+  // Check session via a protected endpoint (cookie is httpOnly — can't read client-side)
   useEffect(() => {
-    fetch('/api/admin/profile')
+    fetch('/api/admin/auth-check')
       .then(res => {
         if (res.ok) setIsAuthenticated(true);
         setLoading(false);
